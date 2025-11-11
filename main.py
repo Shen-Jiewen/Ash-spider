@@ -16,17 +16,17 @@ from typing import Optional, Dict, Any, List
 CRAWLERS: Dict[str, Dict[str, Any]] = {
     "1": {
         "name": "idealo",
-        "description": "idealo.de - Price comparison portal",
+        "description": "idealo.de - 价格比价网站",
         "module": "crawlers.idealo",
     },
     "2": {
         "name": "kleineskraftwerk",
-        "description": "kleineskraftwerk.de - Small power station products",
+        "description": "kleineskraftwerk.de - 小型电站产品",
         "module": "crawlers.kleineskraftwerk",
     },
     "3": {
         "name": "priwatt",
-        "description": "priwatt.de - Balcony power plant products",
+        "description": "priwatt.de - 阳台电站产品",
         "module": "crawlers.priwatt",
     },
 }
@@ -44,11 +44,11 @@ def print_header(text: str) -> None:
 def print_menu() -> None:
     """Prints the main menu of available crawlers."""
     print_header("Ash Spider - Crawler Selection")
-    print("Please choose a crawler to run:\n")
+    print("请选择要运行的爬虫：\n")
     for key, crawler in CRAWLERS.items():
         print(f"  {key}. {crawler['description']}")
-    print("\n  a. Run ALL crawlers")
-    print("  q. Quit\n")
+    print("\n  a. 运行所有爬虫")
+    print("  q. 退出\n")
 
 
 def get_user_choice() -> Optional[List[str]]:
@@ -60,10 +60,10 @@ def get_user_choice() -> Optional[List[str]]:
     """
     while True:
         print_menu()
-        choice = input("Enter your choice (e.g., 1, a, q): ").strip().lower()
+        choice = input("请输入选择（例如 1、a、q）：").strip().lower()
 
         if choice == "q":
-            print("\nGoodbye!")
+            print("\n再见！")
             return None
 
         if choice == "a":
@@ -72,7 +72,7 @@ def get_user_choice() -> Optional[List[str]]:
         if choice in CRAWLERS:
             return [choice]
 
-        print(f"\n[ERROR] Invalid choice '{choice}'. Please try again.")
+        print(f"\n[错误] 无效选择 '{choice}'，请重试。")
 
 
 # --- Crawler Execution Logic ---
@@ -88,33 +88,33 @@ async def run_crawler(crawler_key: str) -> bool:
         True if the crawler ran successfully, False otherwise.
     """
     if crawler_key not in CRAWLERS:
-        print(f"[ERROR] Invalid crawler key provided: {crawler_key}")
+        print(f"[错误] 无效的爬虫密钥：{crawler_key}")
         return False
 
     crawler_info = CRAWLERS[crawler_key]
     crawler_name = crawler_info["name"]
     module_name = crawler_info["module"]
 
-    print(f"\n--- Starting Crawler: {crawler_name.upper()} ---")
+    print(f"\n--- 开始运行爬虫：{crawler_name.upper()} ---")
 
     try:
         # Dynamically import the specified crawler module
         module = __import__(module_name, fromlist=[crawler_name])
 
         if not hasattr(module, "crawl"):
-            print(f"[ERROR] The module '{module_name}' does not have a 'crawl' function.")
+            print(f"[错误] 模块 '{module_name}' 未包含 'crawl' 函数。")
             return False
 
         # Execute the crawl function
         await module.crawl()
-        print(f"[SUCCESS] Crawler '{crawler_name}' finished.")
+        print(f"[成功] 爬虫 '{crawler_name}' 已完成。")
         return True
 
     except ImportError:
-        print(f"[ERROR] Could not import crawler module: '{module_name}'. Please check the file path.")
+        print(f"[错误] 无法导入爬虫模块：'{module_name}'。请检查文件路径。")
         return False
     except Exception as e:
-        print(f"[ERROR] An unexpected error occurred while running '{crawler_name}': {e}")
+        print(f"[错误] 运行 '{crawler_name}' 时发生意外错误：{e}")
         import traceback
         traceback.print_exc()
         return False
@@ -136,15 +136,15 @@ async def run_selected_crawlers(crawler_keys: List[str]) -> int:
         results.append((CRAWLERS[key]["name"], success))
 
     # Print a final summary of all operations
-    print_header("Execution Summary")
+    print_header("执行摘要")
     successful_crawlers = sum(1 for _, success in results if success)
     failed_crawlers = len(results) - successful_crawlers
 
     for name, success in results:
-        status = "✅ SUCCESS" if success else "❌ FAILED"
+        status = "✅ 成功" if success else "❌ 失败"
         print(f"  - {name}: {status}")
 
-    print(f"\nSummary: {successful_crawlers} succeeded, {failed_crawlers} failed.")
+    print(f"\n总结：{successful_crawlers} 个成功，{failed_crawlers} 个失败。")
     return 1 if failed_crawlers > 0 else 0
 
 
@@ -158,7 +158,7 @@ def main() -> int:
     # Add the 'crawlers' directory to the Python path to allow for dynamic imports
     sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-    print_header("Welcome to Ash Spider - Web Crawler Suite")
+    print_header("欢迎使用 Ash Spider - 网络爬虫套件")
 
     # Get the user's choice from the interactive menu
     selected_keys = get_user_choice()
@@ -169,7 +169,7 @@ def main() -> int:
     try:
         return asyncio.run(run_selected_crawlers(selected_keys))
     except KeyboardInterrupt:
-        print("\n\n[INTERRUPTED] Operation cancelled by user.")
+        print("\n\n[中断] 操作被用户取消。")
         return 130
 
 

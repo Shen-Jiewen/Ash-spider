@@ -323,14 +323,14 @@ async def crawl() -> list[dict]:
             )
             products = parse_search_html(res.html)
             if products:
-                print(f"[idealo] Successfully parsed {len(products)} products on attempt {attempt + 1}.")
+                print(f"[idealo] 第{attempt + 1}次解析成功，解析到 {len(products)} 个产品。")
                 break
             else:
-                print(f"[idealo] Attempt {attempt + 1} failed to parse products, retrying...")
+                print(f"[idealo] 第{attempt + 1}次解析失败，正在重试...")
                 await asyncio.sleep(2) # Wait a bit before retrying
 
         if not products:
-            print("[idealo] Failed to parse any products after multiple attempts.")
+            print("[idealo] 多次尝试后未解析到任何产品。")
             return []
 
         detailed = await asyncio.gather(
@@ -346,7 +346,7 @@ async def crawl() -> list[dict]:
         writer.writeheader()
         for item in detailed:
             writer.writerow({k: item.get(k, "") for k in fields})
-    print(f"[idealo] Saved {len(detailed)} records to {OUTPUT_PATH}")
+    print(f"[idealo] 已将 {len(detailed)} 条记录保存到 {OUTPUT_PATH}")
     
     return detailed
 

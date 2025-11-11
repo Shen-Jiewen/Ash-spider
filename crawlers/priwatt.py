@@ -123,7 +123,7 @@ def extract_prices_from_detail(html: str) -> tuple[str, str]:
 
 
 async def fetch_products(crawler: AsyncWebCrawler, url: str) -> list[dict]:
-    print(f"🔍 Crawling {url} ...")
+    print(f"🔍 正在爬取 {url} ...")
     try:
         res = await crawler.arun(
             url=url,
@@ -132,16 +132,16 @@ async def fetch_products(crawler: AsyncWebCrawler, url: str) -> list[dict]:
             wait_until="networkidle"
         )
     except Exception as exc:
-        print(f"❌ Failed to fetch {url}: {exc}")
+        print(f"❌ 获取 {url} 失败：{exc}")
         return []
 
     if not res or not res.html:
-        print(f"❌ Empty response for {url}")
+        print(f"❌ {url} 返回空响应")
         return []
 
     products = parse_products(res.html, url)
     if not products:
-        print(f"⚠️ No products parsed from {url}")
+        print(f"⚠️ 未从 {url} 解析到产品")
     return products
 
 
@@ -150,7 +150,7 @@ async def enrich_product_with_detail(crawler: AsyncWebCrawler, product: dict) ->
     if not detail_url:
         return product
 
-    print(f"  ↪️ Fetching detail page: {detail_url}")
+    print(f"  ↪️ 正在获取详情页：{detail_url}")
     try:
         res = await crawler.arun(
             url=detail_url,
@@ -159,11 +159,11 @@ async def enrich_product_with_detail(crawler: AsyncWebCrawler, product: dict) ->
             wait_until="networkidle"
         )
     except Exception as exc:
-        print(f"❌ Failed to fetch detail page {detail_url}: {exc}")
+        print(f"❌ 获取详情页 {detail_url} 失败：{exc}")
         return product
 
     if not res or not res.html:
-        print(f"❌ Empty detail response for {detail_url}")
+        print(f"❌ {detail_url} 详情页返回空响应")
         return product
 
     original_price, discount_price = extract_prices_from_detail(res.html)
@@ -191,7 +191,7 @@ async def crawl() -> list[dict]:
                 all_items.append(item)
 
         if all_items:
-            print(f"\n🔄 Fetching detail pages for {len(all_items)} products ...")
+            print(f"\n🔄 正在获取 {len(all_items)} 个产品的详情页 ...")
             enriched_items = await asyncio.gather(*[
                 enrich_product_with_detail(crawler, item) for item in all_items
             ])
@@ -209,12 +209,12 @@ async def crawl() -> list[dict]:
         items = grouped.get(url, [])
         if not items:
             continue
-        print(f"\n📦 Products from {url}:")
+        print(f"\n📦 来自 {url} 的产品：")
         for item in items:
             total += 1
             print(
-                f"- {item['title']} | original: {item.get('original_price', '')} | "
-                f"discount: {item.get('discount_price', '')} | rate: {item.get('discount_rate', '')} | {item['detail_url']}"
+                f"- {item['title']} | 原价: {item.get('original_price', '')} | "
+                f"优惠价: {item.get('discount_price', '')} | 折扣: {item.get('discount_rate', '')} | {item['detail_url']}"
             )
             all_products.append({
                 "source_url": item.get("source_url", url),
@@ -239,11 +239,11 @@ async def crawl() -> list[dict]:
             writer = csv.DictWriter(fh, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(all_products)
-        print(f"\n💾 Saved {len(all_products)} records to {OUTPUT_PATH}")
+        print(f"\n💾 已保存 {len(all_products)} 条记录到 {OUTPUT_PATH}")
     else:
-        print("\n⚠️ No product data to persist.")
+        print("\n⚠️ 无产品数据可保存。")
 
-    print(f"\n✅ Completed. Extracted {total} products across {len(URLS)} pages.")
+    print(f"\n✅ 完成。共提取 {total} 个产品，覆盖 {len(URLS)} 个页面。")
     return all_products
 
 
@@ -260,7 +260,7 @@ async def main():
                 all_items.append(item)
 
         if all_items:
-            print(f"\n🔄 Fetching detail pages for {len(all_items)} products ...")
+            print(f"\n🔄 正在获取 {len(all_items)} 个产品的详情页 ...")
             enriched_items = await asyncio.gather(*[
                 enrich_product_with_detail(crawler, item) for item in all_items
             ])
@@ -278,7 +278,7 @@ async def main():
         items = grouped.get(url, [])
         if not items:
             continue
-        print(f"\n📦 Products from {url}:")
+        print(f"\n📦 来自 {url} 的产品：")
         for item in items:
             total += 1
             print(
@@ -308,11 +308,11 @@ async def main():
             writer = csv.DictWriter(fh, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(all_products)
-        print(f"\n💾 Saved {len(all_products)} records to {OUTPUT_PATH}")
+        print(f"\n💾 已保存 {len(all_products)} 条记录到 {OUTPUT_PATH}")
     else:
-        print("\n⚠️ No product data to persist.")
+        print("\n⚠️ 无产品数据可保存。")
 
-    print(f"\n✅ Completed. Extracted {total} products across {len(URLS)} pages.")
+    print(f"\n✅ 完成。共提取 {total} 个产品，覆盖 {len(URLS)} 个页面。")
     return all_products
 
 
